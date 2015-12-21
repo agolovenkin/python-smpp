@@ -65,4 +65,3 @@ pdu_hex_strings = [
         ''',
 
 ]
-

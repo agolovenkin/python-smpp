@@ -3,7 +3,8 @@ import socket
 from esme import *
 
 
-class SMSC(ESME): # this is a dummy SMSC, just for testing
+class SMSC(ESME):
+    # this is a dummy SMSC, just for testing
 
     def __init__(self, port=2775, credentials={}):
         self.credentials = credentials
@@ -14,10 +15,10 @@ class SMSC(ESME): # this is a dummy SMSC, just for testing
         print 'Connected by', self.addr
         while 1:
             pdu = self._ESME__recv()
-            if not pdu: break
+            if not pdu:
+                break
             self.conn.send(pack_pdu(self.__response(pdu)))
         self.conn.close()
-
 
     def __response(self, pdu):
         pdu_resp = {}
@@ -53,7 +54,7 @@ class SMSC(ESME): # this is a dummy SMSC, just for testing
             resp_body['mandatory_parameters'] = resp_mandatory_parameters
             resp_mandatory_parameters['system_id'] = pdu['body']['mandatory_parameters']['system_id']
         if pdu['header']['command_id'] in [
-                #'submit_sm', # message_id is optional in submit_sm
+                # 'submit_sm', # message_id is optional in submit_sm
                 'submit_multi',
                 'deliver_sm',
                 'data_sm',
@@ -73,7 +74,5 @@ class SMSC(ESME): # this is a dummy SMSC, just for testing
         return pdu_resp
 
 
-
 if __name__ == '__main__':
     smsc = SMSC(2777)
-
