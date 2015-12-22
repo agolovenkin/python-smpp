@@ -3,14 +3,21 @@ import unittest
 import collections
 from datetime import datetime, timedelta
 
-from smpp.esme import *
-from smpp.clickatell import *
+from smpp.esme import ESME
+from smpp.clickatell import clickatell_defaults
 from smpp import pdu
+from smpp.pdu_builder import SubmitSM
 import credentials_test
 try:
     import credentials_priv
 except:
     pass
+import binascii
+import re
+try:
+    import json
+except:
+    import simplejson as json
 
 from test.pdu import pdu_objects
 from test.pdu_hex import pdu_hex_strings
@@ -20,7 +27,7 @@ from test import pdu_hex_asserts
 
 def unpack_hex(pdu_hex):
     """Unpack PDU hex string and return it as a dictionary"""
-    return unpack_pdu(binascii.a2b_hex(hexclean(pdu_hex)))
+    return pdu.unpack_pdu(binascii.a2b_hex(hexclean(pdu_hex)))
 
 
 def hexclean(dirtyhex):
@@ -59,7 +66,7 @@ def create_pdu_asserts():
         pstr += "pdu_json_"
         pstr += ('%010d' % pdu_index)
         pstr += " = '''"
-        pstr += prettydump(unpack_pdu(pack_pdu(pdu_object)))
+        pstr += prettydump(pdu.unpack_pdu(pdu.pack_pdu(pdu_object)))
         pstr += "'''"
         print pstr
 
@@ -72,7 +79,7 @@ def create_pdu_hex_asserts():
         pstr += "pdu_json_"
         pstr += ('%010d' % pdu_index)
         pstr += " = '''"
-        pstr += prettydump(unpack_hex(pdu_hex))
+        pstr += prettydump(pdu.unpack_hex(pdu_hex))
         pstr += "'''"
         print pstr
 
@@ -134,7 +141,7 @@ class PduTestCase(unittest.TestCase):
             print '...', padded_index
             str_eval = re.sub('null', 'None', eval('pdu_asserts.pdu_json_'+padded_index))
             self.assertEquals(
-                unpack_pdu(pack_pdu(pdu_object)),
+                pdu.unpack_pdu(pdu.pack_pdu(pdu_object)),
                 eval(str_eval)
             )
 
@@ -199,7 +206,7 @@ class PduTestCase(unittest.TestCase):
             submit_sm['header']['sequence_number'] = x
             sm = 'testing: x = '+str(x)+''
             submit_sm['body']['mandatory_parameters']['short_message'] = sm
-            u = unpack_pdu(pack_pdu(submit_sm))
+            u = pdu.unpack_pdu(pdu.pack_pdu(submit_sm))
         delta = datetime.now() - start
         print '... 500 pack & unpacks in:', delta
         self.assertTrue(delta < timedelta(seconds=1))
@@ -241,7 +248,7 @@ class PduTestCase(unittest.TestCase):
         }
         self.assertDictEquals(
             hex_to_named(submit_sm),
-            unpack_pdu(pack_pdu(submit_sm))
+            pdu.unpack_pdu(pdu.pack_pdu(submit_sm))
         )
 
     def test_pack_unpack_of_ascii_and_unicode_8_16_32(self):
@@ -281,58 +288,58 @@ class PduTestCase(unittest.TestCase):
         }
         self.assertDictEquals(
             hex_to_named(submit_sm),
-            unpack_pdu(pack_pdu(submit_sm))
+            pdu.unpack_pdu(pdu.pack_pdu(submit_sm))
         )
 
     def test_optional_param_length(self):
         # Variable length hex string.
         self.assertEqual(
-            '04240000', encode_optional_parameter('message_payload', ''))
+            '04240000', pdu.encode_optional_parameter('message_payload', ''))
         self.assertEqual(
             '04240004deadbeef',
-            encode_optional_parameter('message_payload', 'deadbeef'))
+            pdu.encode_optional_parameter('message_payload', 'deadbeef'))
 
         # Fixed length integer.
         self.assertEqual(
             '020400020000',
-            encode_optional_parameter('user_message_reference', 0))
+            pdu.encode_optional_parameter('user_message_reference', 0))
         self.assertEqual(
             '0204000201ff',
-            encode_optional_parameter('user_message_reference', 511))
+            pdu.encode_optional_parameter('user_message_reference', 511))
 
     def test_encode_param_type_no_value(self):
-        self.assertEqual(encode_param_type(None, 'integer'), None)
-        self.assertEqual(encode_param_type(None, 'string'), None)
-        self.assertEqual(encode_param_type(None, 'xstring'), None)
-        self.assertEqual(encode_param_type(None, 'bitmask'), None)
-        self.assertEqual(encode_param_type(None, 'hex'), None)
+        self.assertEqual(pdu.encode_param_type(None, 'integer'), None)
+        self.assertEqual(pdu.encode_param_type(None, 'string'), None)
+        self.assertEqual(pdu.encode_param_type(None, 'xstring'), None)
+        self.assertEqual(pdu.encode_param_type(None, 'bitmask'), None)
+        self.assertEqual(pdu.encode_param_type(None, 'hex'), None)
 
     def test_encode_param_type_integer(self):
-        self.assertEqual(encode_param_type(0, 'integer'), '00')
-        self.assertEqual(encode_param_type(1, 'integer'), '01')
-        self.assertEqual(encode_param_type(255, 'integer'), 'ff')
-        self.assertEqual(encode_param_type(256, 'integer'), '0100')
+        self.assertEqual(pdu.encode_param_type(0, 'integer'), '00')
+        self.assertEqual(pdu.encode_param_type(1, 'integer'), '01')
+        self.assertEqual(pdu.encode_param_type(255, 'integer'), 'ff')
+        self.assertEqual(pdu.encode_param_type(256, 'integer'), '0100')
 
-        self.assertEqual(encode_param_type(0, 'integer', min=2), '0000')
-        self.assertEqual(encode_param_type(255, 'integer', min=2), '00ff')
-        self.assertEqual(encode_param_type(256, 'integer', min=2), '0100')
+        self.assertEqual(pdu.encode_param_type(0, 'integer', min=2), '0000')
+        self.assertEqual(pdu.encode_param_type(255, 'integer', min=2), '00ff')
+        self.assertEqual(pdu.encode_param_type(256, 'integer', min=2), '0100')
 
-        self.assertEqual(encode_param_type(255, 'integer', max=1), 'ff')
-        self.assertRaises(ValueError, encode_param_type, 256, 'integer', max=1)
+        self.assertEqual(pdu.encode_param_type(255, 'integer', max=1), 'ff')
+        self.assertRaises(ValueError, pdu.encode_param_type, 256, 'integer', max=1)
 
     def test_encode_param_type_string(self):
-        self.assertEqual(encode_param_type('', 'string'), '00')
-        self.assertEqual(encode_param_type('ABC', 'string'), '41424300')
-        self.assertEqual(encode_param_type('ABC', 'string', max=4), '41424300')
+        self.assertEqual(pdu.encode_param_type('', 'string'), '00')
+        self.assertEqual(pdu.encode_param_type('ABC', 'string'), '41424300')
+        self.assertEqual(pdu.encode_param_type('ABC', 'string', max=4), '41424300')
         self.assertRaises(
-            ValueError, encode_param_type, 'ABC', 'string', max=3)
+            ValueError, pdu.encode_param_type, 'ABC', 'string', max=3)
 
     def test_encode_param_type_xstring(self):
-        self.assertEqual(encode_param_type('', 'xstring'), '')
-        self.assertEqual(encode_param_type('ABC', 'xstring'), '414243')
-        self.assertEqual(encode_param_type('ABC', 'xstring', max=3), '414243')
+        self.assertEqual(pdu.encode_param_type('', 'xstring'), '')
+        self.assertEqual(pdu.encode_param_type('ABC', 'xstring'), '414243')
+        self.assertEqual(pdu.encode_param_type('ABC', 'xstring', max=3), '414243')
         self.assertRaises(
-            ValueError, encode_param_type, 'ABC', 'xstring', max=2)
+            ValueError, pdu.encode_param_type, 'ABC', 'xstring', max=2)
 
     def test_ignore_invalid_null_after_short_message_field(self):
         """
@@ -369,9 +376,9 @@ class PduTestCase(unittest.TestCase):
                 },
             },
         }
-        packed_pdu = pack_pdu(deliver_sm)
-        unpacked_pdu = unpack_pdu(packed_pdu)
-        unpacked_dodgy_pdu = unpack_pdu(packed_pdu + '\x00')
+        packed_pdu = pdu.pack_pdu(deliver_sm)
+        unpacked_pdu = pdu.unpack_pdu(packed_pdu)
+        unpacked_dodgy_pdu = pdu.unpack_pdu(packed_pdu + '\x00')
         self.assertEqual(unpacked_pdu, unpacked_dodgy_pdu)
 
 
