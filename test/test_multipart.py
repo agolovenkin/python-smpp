@@ -1,5 +1,5 @@
 
-import unittest, collections
+import unittest
 
 from smpp.pdu_builder import *
 from smpp.pdu_inspector import *
@@ -33,7 +33,6 @@ class MultipartTestCase(unittest.TestCase):
         self.assertEquals(detect_multipart(unpack_pdu(csm16.get_bin()))['multipart_type'], 'CSM16')
         self.assertEquals(detect_multipart(unpack_pdu(none_short_message.get_bin())), None)
 
-
     def test_ordering(self):
         """
         Out of order pieces must be re-assembled in-order
@@ -50,7 +49,6 @@ class MultipartTestCase(unittest.TestCase):
         multi.add_pdu(sar_1.get_obj())
         self.assertEquals(multi.get_completed()['message'],
                 'There she was just a walking down the street, singing doo wa diddy diddy dum diddy do')
-
 
     def test_real_csm_data(self):
         """
@@ -72,4 +70,3 @@ class MultipartTestCase(unittest.TestCase):
         multi.add_pdu(asif_1)
         self.assertEquals(multi.get_completed()['message'], 'I try to send sms testing vumi sms sms sms sms msm sms sms sms sms sms sms sms sms sms ssms sms smS sms sms sms sms sms sms sms sns sns sms sms sms sms smns again again again again again again again again sms sms sms sms sms ')
         self.assertEquals(multi.get_key(), '261xxx720371_261xxx782943_26_2')
-
