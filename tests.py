@@ -139,7 +139,7 @@ class PduTestCase(unittest.TestCase):
             pdu_index += 1
             padded_index = '%010d' % pdu_index
             print '...', padded_index
-            str_eval = re.sub('null', 'None', eval('pdu_asserts.pdu_json_'+padded_index))
+            str_eval = re.sub('null', 'None', eval('pdu_asserts.pdu_json_' + padded_index))
             self.assertEquals(
                 pdu.unpack_pdu(pdu.pack_pdu(pdu_object)),
                 eval(str_eval)
@@ -155,7 +155,7 @@ class PduTestCase(unittest.TestCase):
             pdu_index += 1
             padded_index = '%010d' % pdu_index
             print '...', padded_index
-            str_eval = re.sub('null', 'None', eval('pdu_hex_asserts.pdu_json_'+padded_index))
+            str_eval = re.sub('null', 'None', eval('pdu_hex_asserts.pdu_json_' + padded_index))
             self.assertEquals(
                 unpack_hex(pdu_hex),
                 eval(str_eval)
