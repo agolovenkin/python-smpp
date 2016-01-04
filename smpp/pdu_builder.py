@@ -146,7 +146,7 @@ class SubmitMulti(SM1):
         mandatory_parameters['number_of_dests'] = number_of_dests
         mandatory_parameters['dest_address'] = [] + dest_address
 
-    def addDestinationAddress(self, destination_addr, dest_addr_ton=0, dest_addr_npi=0, ):
+    def addDestinationAddress(self, destination_addr, dest_addr_ton=0, dest_addr_npi=0):
         if isinstance(destination_addr, str) and len(destination_addr) > 0:
             new_entry = {
                 'dest_flag': 1,
