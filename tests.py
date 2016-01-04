@@ -139,7 +139,7 @@ class PduTestCase(unittest.TestCase):
             pdu_index += 1
             padded_index = '%010d' % pdu_index
             print '...', padded_index
-            str_eval = re.sub('null', 'None', eval('pdu_asserts.pdu_json_' + padded_index))
+            str_eval = re.sub('null', 'None', getattr(pdu_asserts, 'pdu_json_' + padded_index))
             self.assertEquals(
                 pdu.unpack_pdu(pdu.pack_pdu(pdu_object)),
                 eval(str_eval)
