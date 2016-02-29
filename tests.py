@@ -381,6 +381,42 @@ class PduTestCase(unittest.TestCase):
         unpacked_dodgy_pdu = pdu.unpack_pdu(packed_pdu + '\x00')
         self.assertEqual(unpacked_pdu, unpacked_dodgy_pdu)
 
+    def test_validity_period(self):
+        """
+        Should be able to pack and unpack a PDU with a valid validity_period.
+        """
+        submit_sm = {
+            'header': {
+                'command_length': 67,
+                'command_id': 'submit_sm',
+                'command_status': 'ESME_ROK',
+                'sequence_number': 0,
+            },
+            'body': {
+                'mandatory_parameters': {
+                    'service_type': '',
+                    'source_addr_ton': 'international',
+                    'source_addr_npi': 'unknown',
+                    'source_addr': '',
+                    'dest_addr_ton': 'international',
+                    'dest_addr_npi': 'unknown',
+                    'destination_addr': '',
+                    'esm_class': 0,
+                    'protocol_id': 0,
+                    'priority_flag': 0,
+                    'schedule_delivery_time': '',
+                    'validity_period': '000001234567800R',
+                    'registered_delivery': 0,
+                    'replace_if_present_flag': 0,
+                    'data_coding': 0,
+                    'sm_default_msg_id': 0,
+                    'sm_length': 18,
+                    'short_message': 'Test Short Message',
+                },
+            },
+        }
+        self.assertEqual(pdu.unpack_pdu(pdu.pack_pdu(submit_sm)), submit_sm)
+
 
 class PduBuilderTestCase(unittest.TestCase):
     def test_submit_sm_message_too_long(self):
