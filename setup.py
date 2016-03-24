@@ -8,7 +8,7 @@ def read_file(filename):
 
 setup(
     name="python-smpp",
-    version="0.1.9a",
+    version="0.1.9",
     url='http://github.com/praekelt/python-smpp',
     license='BSD',
     description="Python SMPP Library",
