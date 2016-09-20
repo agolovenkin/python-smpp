@@ -70,7 +70,7 @@ mandatory_parameter_lists = {
         {'name': 'esm_class',               'min': 1, 'max': 1,   'var': False,             'type': 'integer',       'map': None},
         {'name': 'protocol_id',             'min': 1, 'max': 1,   'var': False,             'type': 'integer',       'map': None},
         {'name': 'priority_flag',           'min': 1, 'max': 1,   'var': False,             'type': 'integer',       'map': None},
-        {'name': 'schedule_delivery_time',  'min': 1, 'max': 17,  'var': False,             'type': 'string',        'map': None},
+        {'name': 'schedule_delivery_time',  'min': 1, 'max': 17,  'var': True,              'type': 'string',        'map': None},
         {'name': 'validity_period',         'min': 1, 'max': 17,  'var': True,              'type': 'string',        'map': None},
         {'name': 'registered_delivery',     'min': 1, 'max': 1,   'var': False,             'type': 'integer',       'map': None},
         {'name': 'replace_if_present_flag', 'min': 1, 'max': 1,   'var': False,             'type': 'integer',       'map': None},
